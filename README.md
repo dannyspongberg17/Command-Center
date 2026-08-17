@@ -1,8 +1,9 @@
 # Command Center
 
 A personal dashboard built to host multiple AI-powered agents. The first
-agent is the **Investment Agent**: a manual portfolio tracker with
-Claude-generated diversification and concentration-risk insights.
+agent is the **Investment Agent**: a portfolio tracker — holdings entered
+manually or synced from real accounts via Plaid — with Claude-generated
+diversification and concentration-risk insights.
 
 Not financial advice — the Investment Agent is informational only.
 
@@ -12,6 +13,7 @@ Not financial advice — the Investment Agent is informational only.
 - [Prisma](https://prisma.io) + PostgreSQL
 - [NextAuth](https://next-auth.js.org) — single-user credentials login
 - [Anthropic SDK](https://github.com/anthropics/anthropic-sdk-typescript) — powers the Investment Agent's AI insights
+- [Plaid](https://plaid.com) — links real brokerage/bank accounts for automatic holdings sync
 
 ## Architecture: the agent registry
 
@@ -70,7 +72,9 @@ No existing agent's files need to change.
 3. In the Vercel project's Environment Variables, set everything from
    `.env.example`: `DATABASE_URL`, `NEXTAUTH_SECRET` (generate with
    `openssl rand -base64 32`), `NEXTAUTH_URL` (your production URL),
-   `ANTHROPIC_API_KEY`, `ADMIN_EMAIL`, `ADMIN_PASSWORD`.
+   `ANTHROPIC_API_KEY`, `ADMIN_EMAIL`, `ADMIN_PASSWORD`, `PLAID_CLIENT_ID`,
+   `PLAID_SECRET`, `PLAID_ENV` (`sandbox` or `production`), and
+   `ENCRYPTION_KEY` (another `openssl rand -base64 32`).
 4. Deploy. Then run the migration and seed once against the production
    database (e.g. `npx prisma migrate deploy` and `npm run db:seed` locally,
    pointed at the production `DATABASE_URL`, or via Vercel's CLI/shell).
@@ -82,3 +86,9 @@ No existing agent's files need to change.
 - Route access is enforced in `proxy.ts` (Next.js 16 renamed the
   `middleware.ts` convention to `proxy.ts`); every route except `/login`
   requires a signed-in session.
+- Plaid access tokens are encrypted at rest (AES-256-GCM, keyed by
+  `ENCRYPTION_KEY`) — losing that key means existing linked accounts can no
+  longer be synced or disconnected through Plaid and would need to be
+  removed and re-linked.
+- Plaid-synced holdings are read-only in the UI (edited only by syncing
+  again); disconnect a linked account to remove them.
