@@ -12,9 +12,11 @@ export async function POST() {
   try {
     const { link_token } = await createLinkToken(session.user.id);
     return NextResponse.json({ linkToken: link_token });
-  } catch {
+  } catch (error) {
+    const plaidError = (error as { response?: { data?: unknown } })?.response?.data;
+    console.error("Plaid create-link-token failed:", plaidError ?? error);
     return NextResponse.json(
-      { error: "Failed to start Plaid Link. Check PLAID_CLIENT_ID/PLAID_SECRET/PLAID_ENV are configured." },
+      { error: "Failed to start Plaid Link.", detail: plaidError ?? String(error) },
       { status: 502 }
     );
   }

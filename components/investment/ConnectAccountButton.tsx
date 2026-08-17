@@ -64,7 +64,13 @@ export function ConnectAccountButton({ onConnected }: { onConnected: () => void 
 
     if (!res.ok) {
       setLoading(false);
-      setError("Couldn't start account linking. Check Plaid is configured.");
+      const body = await res.json().catch(() => null);
+      const detail = body?.detail;
+      const detailText =
+        typeof detail === "string"
+          ? detail
+          : detail?.error_message || detail?.display_message || JSON.stringify(detail ?? "");
+      setError(`Couldn't start account linking.${detailText ? ` ${detailText}` : ""}`);
       return;
     }
 
