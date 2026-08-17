@@ -35,4 +35,11 @@ export type Holding = {
   notes: string | null;
   createdAt: string;
   updatedAt: string;
+  source: "manual" | "plaid";
+};
+
+export type PlaidLinkedAccount = {
+  id: string;
+  institutionName: string;
+  createdAt: string;
 };

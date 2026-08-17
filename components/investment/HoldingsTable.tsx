@@ -52,7 +52,16 @@ export function HoldingsTable({
                 key={holding.id}
                 className="border-b border-neutral-100 last:border-0 dark:border-neutral-900"
               >
-                <td className="py-2.5 pr-4 font-medium">{holding.ticker}</td>
+                <td className="py-2.5 pr-4 font-medium">
+                  <span className="inline-flex items-center gap-1.5">
+                    {holding.ticker}
+                    {holding.source === "plaid" && (
+                      <span className="rounded-full bg-neutral-100 px-1.5 py-0.5 text-[10px] font-normal uppercase tracking-wide text-neutral-500 dark:bg-neutral-800">
+                        Synced
+                      </span>
+                    )}
+                  </span>
+                </td>
                 <td className="py-2.5 pr-4 text-neutral-500">
                   {holding.accountType}
                 </td>
@@ -66,22 +75,24 @@ export function HoldingsTable({
                   {allocation.toFixed(1)}%
                 </td>
                 <td className="py-2.5 pr-0">
-                  <div className="flex justify-end gap-1">
-                    <button
-                      onClick={() => onEdit(holding)}
-                      className="rounded-md p-1.5 text-neutral-400 hover:bg-neutral-100 hover:text-neutral-700 dark:hover:bg-neutral-800 dark:hover:text-neutral-200"
-                      aria-label={`Edit ${holding.ticker}`}
-                    >
-                      <Pencil className="h-3.5 w-3.5" />
-                    </button>
-                    <button
-                      onClick={() => onDelete(holding)}
-                      className="rounded-md p-1.5 text-neutral-400 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-950"
-                      aria-label={`Delete ${holding.ticker}`}
-                    >
-                      <Trash2 className="h-3.5 w-3.5" />
-                    </button>
-                  </div>
+                  {holding.source === "manual" && (
+                    <div className="flex justify-end gap-1">
+                      <button
+                        onClick={() => onEdit(holding)}
+                        className="rounded-md p-1.5 text-neutral-400 hover:bg-neutral-100 hover:text-neutral-700 dark:hover:bg-neutral-800 dark:hover:text-neutral-200"
+                        aria-label={`Edit ${holding.ticker}`}
+                      >
+                        <Pencil className="h-3.5 w-3.5" />
+                      </button>
+                      <button
+                        onClick={() => onDelete(holding)}
+                        className="rounded-md p-1.5 text-neutral-400 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-950"
+                        aria-label={`Delete ${holding.ticker}`}
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
+                  )}
                 </td>
               </tr>
             );

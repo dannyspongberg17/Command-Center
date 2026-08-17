@@ -17,8 +17,9 @@ model User {
   passwordHash String
   createdAt    DateTime @default(now())
 
-  holdings Holding[]
-  insights AgentInsight[]
+  holdings   Holding[]
+  insights   AgentInsight[]
+  plaidItems PlaidItem[]
 }
 
 model Holding {
@@ -32,7 +33,28 @@ model Holding {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  source          String  @default("manual") // "manual" | "plaid"
+  plaidItemId     String?
+  plaidAccountId  String?
+  plaidSecurityId String?
+
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  plaidItem PlaidItem? @relation(fields: [plaidItemId], references: [id], onDelete: Cascade)
+
+  @@unique([plaidAccountId, plaidSecurityId])
+  @@index([userId])
+}
+
+model PlaidItem {
+  id                    String   @id @default(cuid())
+  userId                String
+  itemId                String   @unique
+  institutionName       String
+  accessTokenEncrypted  String
+  createdAt             DateTime @default(now())
+
+  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  holdings Holding[]
 
   @@index([userId])
 }

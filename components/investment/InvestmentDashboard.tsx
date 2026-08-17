@@ -8,7 +8,8 @@ import { HoldingsTable } from "@/components/investment/HoldingsTable";
 import { AllocationChart } from "@/components/investment/AllocationChart";
 import { HoldingFormDialog } from "@/components/investment/HoldingFormDialog";
 import { AIInsightsPanel } from "@/components/investment/AIInsightsPanel";
-import type { Holding, HoldingInput } from "@/lib/agents/investment/types";
+import { LinkedAccounts } from "@/components/investment/LinkedAccounts";
+import type { Holding, HoldingInput, PlaidLinkedAccount } from "@/lib/agents/investment/types";
 
 function formatCurrency(value: number) {
   return value.toLocaleString("en-US", {
@@ -21,15 +22,27 @@ function formatCurrency(value: number) {
 export function InvestmentDashboard({
   initialHoldings,
   initialInsight,
+  initialPlaidItems,
 }: {
   initialHoldings: Holding[];
   initialInsight: { content: string; createdAt: string } | null;
+  initialPlaidItems: PlaidLinkedAccount[];
 }) {
   const [holdings, setHoldings] = useState(initialHoldings);
+  const [plaidItems, setPlaidItems] = useState(initialPlaidItems);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState<Holding | null>(null);
 
   const totalValue = holdings.reduce((sum, h) => sum + h.costBasis, 0);
+
+  async function refreshData() {
+    const [holdingsRes, itemsRes] = await Promise.all([
+      fetch("/api/agents/investment/holdings"),
+      fetch("/api/agents/investment/plaid/items"),
+    ]);
+    if (holdingsRes.ok) setHoldings(await holdingsRes.json());
+    if (itemsRes.ok) setPlaidItems(await itemsRes.json());
+  }
 
   function openAddDialog() {
     setEditing(null);
@@ -83,7 +96,7 @@ export function InvestmentDashboard({
           Investment Agent
         </h1>
         <p className="mt-1 text-neutral-500">
-          Manually tracked holdings, valued at cost basis.
+          Manually tracked or synced holdings, valued at cost basis.
         </p>
       </div>
 
@@ -112,6 +125,8 @@ export function InvestmentDashboard({
           />
         </CardContent>
       </Card>
+
+      <LinkedAccounts items={plaidItems} onRefresh={refreshData} />
 
       <AIInsightsPanel holdings={holdings} initialInsight={initialInsight} />
 

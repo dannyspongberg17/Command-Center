@@ -18,6 +18,12 @@ export async function PATCH(request: Request, { params }: RouteContext) {
   if (!existing || existing.userId !== session.user.id) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
+  if (existing.source === "plaid") {
+    return NextResponse.json(
+      { error: "This holding is synced from a linked account and can't be edited directly." },
+      { status: 409 }
+    );
+  }
 
   const body = await request.json();
   const parsed = holdingInputSchema.safeParse(body);
@@ -47,6 +53,12 @@ export async function DELETE(_request: Request, { params }: RouteContext) {
   const existing = await db.holding.findUnique({ where: { id } });
   if (!existing || existing.userId !== session.user.id) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
+  }
+  if (existing.source === "plaid") {
+    return NextResponse.json(
+      { error: "This holding is synced from a linked account. Disconnect the account to remove it." },
+      { status: 409 }
+    );
   }
 
   await db.holding.delete({ where: { id } });
