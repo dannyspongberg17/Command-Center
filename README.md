@@ -79,6 +79,13 @@ No existing agent's files need to change.
    database (e.g. `npx prisma migrate deploy` and `npm run db:seed` locally,
    pointed at the production `DATABASE_URL`, or via Vercel's CLI/shell).
 
+## MCP servers
+
+- [`mcp-servers/oura-health`](./mcp-servers/oura-health) — a standalone, read-only
+  remote MCP server that gives the *Dannys Health* Claude Console agent access to
+  Oura Ring data (sleep, readiness, activity, HRV, heart rate). It has its own
+  `package.json`, tests and Fly.io deploy guide; see its README.
+
 ## Notes
 
 - Holdings are tracked at **cost basis** (what you paid), not live market

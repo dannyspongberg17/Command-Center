@@ -1,0 +1,37 @@
+# Fly.io configuration for the oura-health MCP server.
+# Replace "oura-health-CHANGE-ME" with your app name (it becomes
+# https://<app-name>.fly.dev). Secrets are NOT stored here — set them with
+# `fly secrets set` (see README).
+app = "oura-health-CHANGE-ME"
+primary_region = "iad"
+
+[env]
+  NODE_ENV = "production"
+  HOST = "0.0.0.0"
+  PORT = "8080"
+  DATA_DIR = "/data"
+  TRUST_PROXY = "true"
+  PUBLIC_BASE_URL = "https://oura-health-CHANGE-ME.fly.dev"
+
+# Persistent disk for the encrypted Oura tokens (survives deploys/restarts).
+[[mounts]]
+  source = "oura_data"
+  destination = "/data"
+
+[http_service]
+  internal_port = 8080
+  force_https = true
+  auto_stop_machines = "stop"
+  auto_start_machines = true
+  min_machines_running = 0
+
+  [[http_service.checks]]
+    grace_period = "10s"
+    interval = "30s"
+    method = "GET"
+    path = "/healthz"
+    timeout = "5s"
+
+[[vm]]
+  size = "shared-cpu-1x"
+  memory = "256mb"

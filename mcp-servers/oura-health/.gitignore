@@ -1,0 +1,8 @@
+node_modules/
+dist/
+# Encrypted Oura tokens live here — never commit them.
+data/
+.env
+.env.*
+!.env.example
+*.log
